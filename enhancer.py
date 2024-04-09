@@ -2,7 +2,6 @@ import pika
 import base64
 import json
 from PIL import Image, ImageEnhance
-import numpy as np
 from io import BytesIO
 
 def adjust_brightness(image, factor):
