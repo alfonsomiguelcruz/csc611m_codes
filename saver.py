@@ -18,7 +18,7 @@ def incrementCounter(ch, method, properties, body, body_dict, connection):
         execution_time = datetime.now() - datetime.fromtimestamp(start_time)  # TODO: not sure 
 
         f = open(output_directory + "/output.txt", "w")
-        f.write("Number of machines: " + str(n_machines) + "\n")
+        # f.write("Number of machines: " + str(n_machines) + "\n")
         f.write("Number of input images: " + str(n_images) + "\n")
         f.write("Number of enhanced images: " + str(n_enhanced_images) + "\n")
         f.write("Execution time: " + str(execution_time) + " seconds\n")
@@ -43,7 +43,6 @@ def callback(ch, method, properties, body):
     print(f" [x] Received {fname}")
 
     # Get image
-    #enhanced_image = Image.fromarray(np.uint8(img)).convert('RGB')
     encoded_image = body_dict['img']
     decoded_image = base64.b64decode(encoded_image)
     image = Image.open(BytesIO(decoded_image)).convert('RGB')
@@ -52,7 +51,7 @@ def callback(ch, method, properties, body):
     image.save(output_directory + "/" + fname)
     
     credentials = pika.PlainCredentials('rabbituser', 'rabbit1234')
-    connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.254.158', 5672, '/', credentials))
+    connection = pika.BlockingConnection(pika.ConnectionParameters('10.151.24.15', 5672, '/', credentials))
     channel = connection.channel()
     channel.queue_declare(queue='counter', durable=True)
     channel.basic_qos(prefetch_count=1)
@@ -61,11 +60,11 @@ def callback(ch, method, properties, body):
     channel.start_consuming()
     
     print(f" [x] Done saving {fname}")
-    ch.basic_ack(delivery_tag=method.delivery_tag) # TODO: check if this should be auto_ack=True instead
+    ch.basic_ack(delivery_tag=method.delivery_tag)
     
 
 credentials = pika.PlainCredentials('rabbituser', 'rabbit1234')
-connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.254.158', 5672, '/', credentials))
+connection = pika.BlockingConnection(pika.ConnectionParameters('10.151.24.15', 5672, '/', credentials))
 channel = connection.channel()
 
 channel.queue_declare(queue='enhanced_images', durable=True)

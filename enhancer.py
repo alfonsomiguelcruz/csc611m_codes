@@ -18,7 +18,7 @@ def adjust_contrast(image, factor):
 
 
 credentials = pika.PlainCredentials('rabbituser', 'rabbit1234')
-connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.254.158', 5672, '/', credentials))
+connection = pika.BlockingConnection(pika.ConnectionParameters('10.151.24.15', 5672, '/', credentials))
 channel = connection.channel()
 
 channel.queue_declare(queue='loaded_images', durable=True)
@@ -33,7 +33,6 @@ def callback(ch, method, properties, body):
 
     # Get Image and Filename Extraction
     fname = body_dict['filename']
-    #img = body_dict['img']
     brightness = body_dict['brightness']
     sharpness = body_dict['sharpness']
     contrast = body_dict['contrast']
@@ -45,17 +44,12 @@ def callback(ch, method, properties, body):
     encoded_image = body_dict['img']
     decoded_image = base64.b64decode(encoded_image)
     image = Image.open(BytesIO(decoded_image)).convert('RGB')
-    #image = Image.fromarray(np.uint8(img)).convert('RGB')
-    #image = Image.open(os.path.join("/home/ubuntu/receiver2_distributed_system/sample_images", fname)).convert('RGB')
     enhanced_image = adjust_brightness(image, brightness)
     enhanced_image = adjust_sharpness(enhanced_image, sharpness)
     enhanced_image = adjust_contrast(enhanced_image, contrast)
 
-    # Prepare message 
-    #arr_enhanced_img = np.array(enhanced_image).tolist()
-
     edited_image_buffer = BytesIO()
-    enhanced_image.save(edited_image_buffer, format=format) # TODO: Specify format?
+    enhanced_image.save(edited_image_buffer, format=format)
     edited_image_data = edited_image_buffer.getvalue()
     encoded_edited_image = base64.b64encode(edited_image_data).decode('utf-8')
 
